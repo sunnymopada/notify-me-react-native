@@ -8,46 +8,93 @@
 
 import React from 'react';
 import type {Node} from 'react';
+
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import {View, Text, Button} from 'react-native';
+import ReminderContext from './src/stores/ReminderContext';
 
-function HomeScreen({navigation}) {
-  return (
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-      <Text>Home Screen</Text>
-      <Button
-        title="Go to Details"
-        onPress={() => navigation.navigate('Details')}
-      />
-    </View>
-  );
-}
+import colors from './src/themes/Colors';
 
-function DetailsScreen({navigation}) {
-  return (
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-      <Text>Details Screen</Text>
-      <Button
-        title="Go to Details... again"
-        onPress={() => navigation.replace('Details')}
-      />
-    </View>
-  );
-}
+import HomeScreen from './src/screens/HomeScreen';
+import AddReminderScreen from './src/screens/AddReminderScreen';
+
+import {
+  ADD_REMINDER_SCREEN,
+  HOME_SCREEN,
+} from './src/constants/NavigationConstants';
 
 const Stack = createNativeStackNavigator();
 
-const App: () => Node = () => {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Details" component={DetailsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-};
+class App extends React.Component {
+  state = {
+    reminders: [
+      {
+        title: 'Excersizes',
+        id: '1',
+      },
+      {
+        title: 'Pray',
+        id: '2',
+      },
+      {
+        title: 'Green Tea',
+        id: '3',
+      },
+      {
+        title: 'News',
+        id: '4',
+      },
+      {
+        title: 'Break fast',
+        id: '5',
+      },
+    ],
+  };
+
+  addReminder = reminder => {
+    const {reminders} = this.state;
+    reminders.push(reminder);
+    this.setState({
+      reminders: reminders,
+    });
+  };
+
+  render() {
+    const {reminders} = this.state;
+    const reminderContextValue = {
+      reminders: reminders,
+      addReminder: this.addReminder,
+    };
+
+    return (
+      <ReminderContext.Provider value={reminderContextValue}>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: colors.primaryColor,
+              },
+              headerTintColor: '#fff',
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
+            }}>
+            <Stack.Screen
+              name={HOME_SCREEN}
+              component={HomeScreen}
+              options={{title: 'Daily Reminders'}}
+            />
+            <Stack.Screen
+              name={ADD_REMINDER_SCREEN}
+              component={AddReminderScreen}
+              options={{title: 'Add Reminder'}}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ReminderContext.Provider>
+    );
+  }
+}
 
 export default App;
